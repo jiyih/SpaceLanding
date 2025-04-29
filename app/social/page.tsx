@@ -1,25 +1,129 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Rocket, ArrowLeft, Users, MessageSquare, Share2 } from "lucide-react"
+import Image from "next/image"
+import { motion, AnimatePresence } from "framer-motion"
+import { Rocket, ArrowLeft, Users, MessageSquare, ChevronLeft, ChevronRight, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import StarBackground from "@/components/star-background"
+
+// Sample community posts data
+const initialCommunityPosts = [
+  {
+    id: 1,
+    author: "Commander Alex",
+    avatar: "/cosmic-guardian.png",
+    handle: "@commander_alex",
+    content:
+      "Just discovered an amazing nebula in sector 7! The colors are breathtaking. Who wants to join the next expedition?",
+    likes: 87,
+    replies: 14,
+    time: "2 hours ago",
+    liked: false,
+  },
+  {
+    id: 2,
+    author: "Dr. Elena Zhao",
+    avatar: "/woman-exploring-exoplanet.png",
+    handle: "@dr_zhao",
+    content:
+      "Our research on the crystalline formations on Proxima B is showing promising results. These structures could revolutionize our understanding of extraterrestrial biology!",
+    likes: 124,
+    replies: 32,
+    time: "5 hours ago",
+    liked: false,
+  },
+  {
+    id: 3,
+    author: "Pilot Zoe",
+    avatar: "/intrepid-explorer.png",
+    handle: "@pilot_zoe",
+    content:
+      "Successfully navigated through the asteroid belt using the new quantum navigation system. Zero damage to the ship! #SpacePilotSkills",
+    likes: 56,
+    replies: 8,
+    time: "Yesterday",
+    liked: false,
+  },
+  {
+    id: 4,
+    author: "Engineer Marcus",
+    avatar: "/orbital-constructor.png",
+    handle: "@eng_marcus",
+    content:
+      "Just upgraded the propulsion system. We're now capable of reaching 0.25c! That's a 15% improvement over our previous max speed.",
+    likes: 93,
+    replies: 21,
+    time: "2 days ago",
+    liked: false,
+  },
+  {
+    id: 5,
+    author: "Security Chief Raj",
+    avatar: "/orbital-guardian.png",
+    handle: "@security_raj",
+    content:
+      "Reminder to all crew: The emergency drill is scheduled for tomorrow at 0900 hours. Please review safety protocols before then.",
+    likes: 45,
+    replies: 7,
+    time: "3 days ago",
+    liked: false,
+  },
+]
 
 export default function SocialPage() {
   const [activeTab, setActiveTab] = useState("community")
+  const [currentPostIndex, setCurrentPostIndex] = useState(0)
+  const [isHologramActive, setIsHologramActive] = useState(false)
+  const [communityPosts, setCommunityPosts] = useState(initialCommunityPosts)
+
+  // Initialize hologram after a delay (without message)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsHologramActive(true)
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Navigate to next post
+  const nextPost = () => {
+    setCurrentPostIndex((prev) => (prev === communityPosts.length - 1 ? 0 : prev + 1))
+  }
+
+  // Navigate to previous post
+  const prevPost = () => {
+    setCurrentPostIndex((prev) => (prev === 0 ? communityPosts.length - 1 : prev - 1))
+  }
+
+  // Handle like button click (without message)
+  const handleLike = () => {
+    setCommunityPosts((prevPosts) => {
+      const updatedPosts = [...prevPosts]
+      const currentPost = updatedPosts[currentPostIndex]
+
+      // Only increment likes if not already liked
+      if (!currentPost.liked) {
+        currentPost.likes += 1
+        currentPost.liked = true
+      }
+
+      return updatedPosts
+    })
+  }
 
   return (
-    <main className="relative min-h-screen bg-black text-white">
-      {/* Stars background */}
-      <StarBackground />
+    <main className="relative min-h-screen overflow-hidden">
+      {/* Spaceship cockpit background */}
+      <div className="fixed inset-0 z-0">
+        <Image src="/images/spaceship-cockpit.jpeg" alt="Spaceship cockpit" fill className="object-cover" priority />
+      </div>
 
-      {/* Content */}
-      <div className="relative z-10">
+      {/* Content overlay */}
+      <div className="relative z-10 min-h-screen">
         {/* Header */}
-        <header className="p-6 flex justify-between items-center">
+        <header className="p-4 flex justify-between items-center backdrop-blur-sm bg-black/20 border-b border-blue-500/30">
           <div className="flex items-center gap-2">
             <Rocket className="h-6 w-6 text-blue-400" />
             <span className="font-zen-dots font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">
@@ -35,132 +139,201 @@ export default function SocialPage() {
           </Button>
         </header>
 
-        {/* Main content */}
-        <div className="max-w-6xl mx-auto p-6">
-          <h1 className="font-zen-dots text-4xl md:text-5xl font-bold mb-8">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">
-              Cosmic Social Hub
-            </span>
-          </h1>
-
-          <div className="flex flex-wrap gap-4 mb-8">
+        {/* Navigation tabs */}
+        <div className="flex justify-center mt-4">
+          <div className="flex gap-2 p-1 bg-black/30 backdrop-blur-md rounded-full border border-blue-500/30">
             <Button
-              variant={activeTab === "community" ? "default" : "outline"}
+              variant={activeTab === "community" ? "default" : "ghost"}
               onClick={() => setActiveTab("community")}
-              className={activeTab === "community" ? "bg-blue-600 hover:bg-blue-700" : "border-blue-500 text-blue-400"}
+              className={`rounded-full ${
+                activeTab === "community" ? "bg-blue-600 hover:bg-blue-700" : "text-blue-300 hover:text-blue-100"
+              }`}
+              size="sm"
             >
               <Users className="mr-2 h-4 w-4" />
               Community
             </Button>
             <Button
-              variant={activeTab === "messages" ? "default" : "outline"}
+              variant={activeTab === "messages" ? "default" : "ghost"}
               onClick={() => setActiveTab("messages")}
-              className={activeTab === "messages" ? "bg-blue-600 hover:bg-blue-700" : "border-blue-500 text-blue-400"}
+              className={`rounded-full ${
+                activeTab === "messages" ? "bg-blue-600 hover:bg-blue-700" : "text-blue-300 hover:text-blue-100"
+              }`}
+              size="sm"
             >
               <MessageSquare className="mr-2 h-4 w-4" />
               Messages
             </Button>
-            <Button
-              variant={activeTab === "share" ? "default" : "outline"}
-              onClick={() => setActiveTab("share")}
-              className={activeTab === "share" ? "bg-blue-600 hover:bg-blue-700" : "border-blue-500 text-blue-400"}
-            >
-              <Share2 className="mr-2 h-4 w-4" />
-              Share
-            </Button>
           </div>
+        </div>
 
+        {/* Main content area */}
+        <div className="flex justify-center items-center h-[calc(100vh-140px)]">
           {activeTab === "community" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className="bg-black/40 backdrop-blur-sm border-blue-900/50">
-                  <CardHeader>
-                    <div className="flex items-center gap-4">
-                      <Avatar>
-                        <AvatarImage
-                          src={`/placeholder.svg?height=40&width=40&query=space explorer avatar`}
-                          alt="User"
-                        />
-                        <AvatarFallback>U{i}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-white">Cosmic Explorer {i + 1}</CardTitle>
-                        <CardDescription className="text-gray-400">@space_traveler_{i + 1}</CardDescription>
+            <div className="relative w-full max-w-2xl">
+              {/* Holographic interface frame */}
+              <div className="absolute inset-0 border-2 border-blue-400/50 rounded-lg pointer-events-none"></div>
+
+              {/* Hologram activation effect */}
+              <AnimatePresence>
+                {isHologramActive && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="absolute inset-0 bg-blue-500/10 backdrop-blur-sm rounded-lg"
+                  ></motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Post navigation controls */}
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 -ml-12 z-20">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={prevPost}
+                  className="rounded-full bg-black/30 text-blue-300 hover:bg-blue-900/50 hover:text-blue-100"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </Button>
+              </div>
+
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 -mr-12 z-20">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={nextPost}
+                  className="rounded-full bg-black/30 text-blue-300 hover:bg-blue-900/50 hover:text-blue-100"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </Button>
+              </div>
+
+              {/* Post counter */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="flex gap-1.5">
+                  {communityPosts.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        index === currentPostIndex ? "bg-blue-400" : "bg-blue-900/70"
+                      }`}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Holographic post display */}
+              <div className="relative h-[500px] flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  {isHologramActive && (
+                    <motion.div
+                      key={currentPostIndex}
+                      initial={{ opacity: 0, y: 20, rotateX: 10 }}
+                      animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                      exit={{ opacity: 0, y: -20, rotateX: -10 }}
+                      transition={{ duration: 0.5 }}
+                      className="w-full max-w-md bg-blue-950/40 backdrop-blur-md border border-blue-500/30 rounded-lg p-6 shadow-[0_0_15px_rgba(56,189,248,0.3)] relative"
+                    >
+                      {/* Holographic scan lines effect */}
+                      <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
+                        {[...Array(20)].map((_, i) => (
+                          <div
+                            key={i}
+                            className="absolute w-full h-[1px] bg-blue-400/10"
+                            style={{ top: `${(i + 1) * 5}%`, animation: `scanline ${2 + i * 0.1}s linear infinite` }}
+                          ></div>
+                        ))}
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-300">
-                      Just discovered an amazing nebula in sector {(i + 1) * 7}! The colors are breathtaking. Who wants
-                      to join the next expedition?
-                    </p>
-                  </CardContent>
-                  <CardFooter className="flex justify-between text-sm text-gray-400">
-                    <span>{Math.floor(Math.random() * 100) + 1} likes</span>
-                    <span>{Math.floor(Math.random() * 20)} replies</span>
-                  </CardFooter>
-                </Card>
-              ))}
+
+                      {/* Holographic glitch effect */}
+                      <div className="absolute inset-0 rounded-lg opacity-30 pointer-events-none">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/20 to-transparent animate-[glitch_3s_ease-in-out_infinite]"></div>
+                      </div>
+
+                      {/* Post content */}
+                      <div className="relative z-10">
+                        <div className="flex items-start gap-4 mb-4">
+                          <Avatar className="h-12 w-12 border-2 border-blue-400/50 ring-2 ring-blue-300/20">
+                            <AvatarImage
+                              src={communityPosts[currentPostIndex].avatar || "/placeholder.svg"}
+                              alt={communityPosts[currentPostIndex].author}
+                            />
+                            <AvatarFallback>{communityPosts[currentPostIndex].author.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-zen-dots text-lg text-white">
+                              {communityPosts[currentPostIndex].author}
+                            </h3>
+                            <p className="text-sm text-blue-200">{communityPosts[currentPostIndex].handle}</p>
+                            <p className="text-xs text-blue-300 mt-1">{communityPosts[currentPostIndex].time}</p>
+                          </div>
+                        </div>
+
+                        <p className="text-white mb-6 leading-relaxed">{communityPosts[currentPostIndex].content}</p>
+
+                        <div className="flex justify-between text-sm text-blue-300">
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400 mr-1"></span>
+                            {communityPosts[currentPostIndex].likes} likes
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400 mr-1"></span>
+                            {communityPosts[currentPostIndex].replies} replies
+                          </span>
+                        </div>
+
+                        <div className="mt-6 flex gap-2">
+                          <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">Reply</Button>
+                          <Button
+                            variant="outline"
+                            className={`flex-1 ${
+                              communityPosts[currentPostIndex].liked
+                                ? "bg-blue-900/50 border-pink-500 text-pink-300"
+                                : "border-blue-500 text-blue-300 hover:bg-blue-900/50"
+                            }`}
+                            onClick={handleLike}
+                          >
+                            <Heart
+                              className={`mr-2 h-4 w-4 ${
+                                communityPosts[currentPostIndex].liked ? "fill-pink-500 text-pink-500" : ""
+                              }`}
+                            />
+                            {communityPosts[currentPostIndex].liked ? "Liked" : "Like"}
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           )}
 
           {activeTab === "messages" && (
-            <div className="bg-black/40 backdrop-blur-sm border border-blue-900/50 rounded-lg p-6">
-              <h2 className="font-zen-dots text-2xl font-bold mb-6">Your Messages</h2>
-              <p className="text-gray-300 mb-8">
-                Connect with fellow space explorers and coordinate your next mission.
-              </p>
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-4 p-4 hover:bg-blue-900/20 rounded-lg transition-colors"
-                  >
-                    <Avatar>
-                      <AvatarImage src={`/placeholder.svg?height=40&width=40&query=space explorer avatar`} alt="User" />
-                      <AvatarFallback>U{i}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <h3 className="font-medium">Cosmic Explorer {i + 1}</h3>
-                      <p className="text-sm text-gray-400 truncate">
-                        Hey! Are you joining the expedition to the Andromeda galaxy next week?
-                      </p>
-                    </div>
-                    <span className="text-xs text-gray-500">{Math.floor(Math.random() * 12) + 1}h ago</span>
-                  </div>
-                ))}
-              </div>
+            <div className="w-full max-w-2xl bg-blue-950/40 backdrop-blur-md border border-blue-500/30 rounded-lg p-6 shadow-[0_0_15px_rgba(56,189,248,0.3)]">
+              <h2 className="font-zen-dots text-2xl text-blue-100 mb-6">Messages</h2>
+              <p className="text-blue-200 mb-6">This feature is coming soon. Check back later for updates!</p>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setActiveTab("community")}>
+                Return to Community
+              </Button>
             </div>
           )}
+        </div>
 
-          {activeTab === "share" && (
-            <div className="bg-black/40 backdrop-blur-sm border border-blue-900/50 rounded-lg p-6">
-              <h2 className="font-zen-dots text-2xl font-bold mb-6">Share Your Journey</h2>
-              <p className="text-gray-300 mb-8">
-                Document your space adventures and share them with the cosmic community.
-              </p>
-              <div className="space-y-6">
-                <div className="p-4 border border-dashed border-blue-500/50 rounded-lg text-center">
-                  <p className="text-gray-400 mb-4">Upload images or videos from your space travels</p>
-                  <Button className="bg-blue-600 hover:bg-blue-700">Upload Media</Button>
-                </div>
-                <div className="p-4 border border-blue-900/30 rounded-lg">
-                  <h3 className="font-medium mb-2">Share to Other Platforms</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" className="border-blue-500 text-blue-400">
-                      Spacebook
-                    </Button>
-                    <Button variant="outline" className="border-cyan-500 text-cyan-400">
-                      Spacer
-                    </Button>
-                    <Button variant="outline" className="border-blue-500 text-blue-400">
-                      CosmicGram
-                    </Button>
-                  </div>
-                </div>
-              </div>
+        {/* Footer with system status */}
+        <div className="fixed bottom-0 left-0 right-0 p-2 bg-black/30 backdrop-blur-sm border-t border-blue-500/20">
+          <div className="flex justify-between items-center text-xs text-blue-300">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400 mr-1"></span>
+                System Online
+              </span>
+              <span>Sector: Alpha Centauri</span>
             </div>
-          )}
+            <div>
+              <span>Stardate: {new Date().toLocaleDateString()}</span>
+            </div>
+          </div>
         </div>
       </div>
     </main>
